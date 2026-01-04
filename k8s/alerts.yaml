@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: springboot-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: springboot.rules
+    rules:
+
+    - alert: HighPodCPUUsage
+      expr: rate(container_cpu_usage_seconds_total{pod=~"springboot.*"}[2m]) > 0.8
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage detected"
+        description: "Spring Boot pod CPU usage is above 80%"
+
+    - alert: PodRestartingFrequently
+      expr: increase(kube_pod_container_status_restarts_total{pod=~"springboot.*"}[5m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod restarting"
+        description: "Spring Boot pod is restarting frequently"
